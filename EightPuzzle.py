@@ -54,21 +54,19 @@ class EightPuzzle:
     #Moves tile into blank space depending on direction
     #Equivalent to moving blank space in opposite direction
     def move(self, direction):
-        #check if move is possible
+        #check if grid is populated
+        if len(self.grid) !=9:
+            return IndexError
+        
         err = TypeError
         move = direction.lower()
-        possible = ['up', 'down', 'left', 'right']
-        
-        
-        
-        if move not in possible:
-            return ValueError
         
         #get coords of blank tile
         blank = self.blank()
         
         if move == 'up':
             #but blank is on the bottom
+            
             if blank[0] == 2:
                 return err
             self.grid[blank[0]][blank[1]] = self.grid[blank[0]+1][blank[1]]
@@ -83,6 +81,7 @@ class EightPuzzle:
         
         elif move == 'right':
             #but blank is on the left
+            
             if blank[1] == 0:
                 return err
             self.grid[blank[0]][blank[1]] = self.grid[blank[0]][blank[1]-1]
@@ -94,9 +93,11 @@ class EightPuzzle:
                 return err
             self.grid[blank[0]][blank[1]] = self.grid[blank[0]][blank[1]+1]
             self.grid[blank[0]][blank[1]+1] = 0
+            
         
         else: 
-            print("Error unknown")
+            print('Error: Direction not recognized')
+            return ValueError
 
         self.print_state()
     
@@ -117,11 +118,11 @@ class EightPuzzle:
 
         #after each move, must add new possible moves and remove new impossible ones
         for i in range(n):
-            self.print_state()
+            
             randnum = random.randint(0,len(moves)-1)
 
             if moves[randnum]==0:
-                print(moves)
+                
                 self.move('up')
                 col -=1
                 if 1 not in moves:
@@ -130,7 +131,7 @@ class EightPuzzle:
                     moves.remove(0)
 
             elif moves[randnum]==1:
-                print(moves)
+                
                 self.move('down')
                 col+=1
                 if 0 not in moves:
@@ -139,7 +140,7 @@ class EightPuzzle:
                     moves.remove(1)
 
             elif moves[randnum]==2:
-                print(moves)
+                
                 self.move('left')
                 row-=1
                 if 3 not in moves:
@@ -148,13 +149,14 @@ class EightPuzzle:
                     moves.remove(2)
 
             elif moves[randnum]==3:
-                print(moves)
+                
                 self.move('right')
                 row+=1
                 if 2 not in moves:
                     moves.insert(2,2)
                 if row == 2:
                     moves.remove(3)
+        self.print_state()
         return 'Scrambled successfully'
 
 
@@ -166,19 +168,24 @@ class EightPuzzle:
         words = txtlwr.split(' ')
         if '#' in words or '//' in words:
             return 0 
+       
         elif 'setstate' in words:
             try:
                 self.set_state(*words[1:])
             except ValueError:
-                print("Error: invalid state")
+                print('Error: invalid state')
+       
         elif 'printstate' in words:
             self.print_state()
 
         elif 'move' in words:
             try:
                 self.move(words[1])
+                
             except TypeError:
-                print("Error: Invalid Move")
+                print('Error: Invalid Move')
+            except IndexError:
+                print('Error: Trying to make move before grid has been initialized')
 
         elif 'scramblestate' in words:
             self.scramble_state(int(words[1]))
@@ -188,8 +195,8 @@ class EightPuzzle:
         
     #Helper: finds indices of blank (0) as a list
     def blank(self):   
-        for i in range(0,3):
-            for j in range(0,3):
+        for i in range(0,2):
+            for j in range(0,2):
                 if self.grid[i][j] == 0:
                     return [i,j]   
 
@@ -212,7 +219,7 @@ class EightPuzzle:
 
 
         
-
+#parses commands and runs each one
 def cmdfile(file, puzzle):
     with open(file) as text:
         cmds = text.readlines()
@@ -222,15 +229,16 @@ def cmdfile(file, puzzle):
             try:
                 puzzle.cmd(command)
             except ValueError:
-                print("Error on line: " + str(num_line))
+                print('Error on line: ' + str(num_line))
             except TypeError:
-                print("Error on line: " + str(num_line))
+                print('Error on line: ' + str(num_line))
    
-
+#runs commands from text input file
 def main(args):
     return cmdfile(args, EightPuzzle())
+
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main(sys.argv[1])
     
 
 

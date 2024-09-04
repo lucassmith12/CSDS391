@@ -1,2 +1,4 @@
-scrambleState 10
+
+move left
+move right
 printState
