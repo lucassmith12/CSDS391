@@ -13,19 +13,12 @@ class EightPuzzle:
     
     def __init__(self):
         self.grid = list()
+        
 
 
     #sets state of the grid. Expects nine entries, otherwise throws error
     def set_state(self, *args):
-        #check validity of args
-        try:
-            self.validate_grid(args)
-        except:
-            return TypeError
-            
-
-
-
+        self.grid = list()
         #slice the args into three rows
         
         top_row = list(args[:3])
@@ -38,9 +31,19 @@ class EightPuzzle:
         self.grid.append(middle_row)
         self.grid.append(bottom_row)
 
+        #check validity of grid currently broken, will fix later
+        '''
+        try:
+            self.validate_grid(self.grid)
+        except TypeError:
+            print('Invalid Grid')
+            return TypeError
+            '''
+            
         return self.grid
 
     #print the state of the grid
+    
     def print_state(self):
         string = ''
         for row in self.grid:
@@ -54,131 +57,122 @@ class EightPuzzle:
     #Moves tile into blank space depending on direction
     #Equivalent to moving blank space in opposite direction
     def move(self, direction):
-        #check if grid is populated
-        if len(self.grid) !=9:
+        #check if grid exists
+        
+        if len(self.grid) !=3:
+            print('Grid is not populated')
             return IndexError
         
+
         err = TypeError
         move = direction.lower()
         
         #get coords of blank tile
-        blank = self.blank()
         
+        row,col = self.blank()
         if move == 'up':
             #but blank is on the bottom
             
-            if blank[0] == 2:
+            if row == 2:
+                print('Illegal move up')
                 return err
-            self.grid[blank[0]][blank[1]] = self.grid[blank[0]+1][blank[1]]
-            self.grid[blank[0]+1][blank[1]] = 0
+            self.grid[row][col] = self.grid[row+1][col]
+            self.grid[row+1][col] = 0
             
         elif move == 'down':
             #but blank is on the top
-            if blank[0]==0:
+            if row==0:
+                print('Illegal move down')
                 return err
-            self.grid[blank[0]][blank[1]] = self.grid[blank[0]-1][blank[1]]
-            self.grid[blank[0]-1][blank[1]] = 0
+            self.grid[row][col] = self.grid[row-1][col]
+            self.grid[row-1][col] = 0
         
         elif move == 'right':
             #but blank is on the left
             
-            if blank[1] == 0:
+            if col == 0:
+                print('Illegal move right')
                 return err
-            self.grid[blank[0]][blank[1]] = self.grid[blank[0]][blank[1]-1]
-            self.grid[blank[0]][blank[1]-1] = 0
+            self.grid[row][col] = self.grid[row][col-1]
+            self.grid[row][col-1] = 0
+            
         
         elif move == 'left': 
             #but blank is on the right
-            if blank[1] == 2:
+            if col == 2:
+                print('Illegal move left')
                 return err
-            self.grid[blank[0]][blank[1]] = self.grid[blank[0]][blank[1]+1]
-            self.grid[blank[0]][blank[1]+1] = 0
+            self.grid[row][col] = self.grid[row][col+1]
+            self.grid[row][col+1] = 0
             
         
         else: 
+            print((move))
             print('Error: Direction not recognized')
             return ValueError
 
-        self.print_state()
+        return self.grid
     
     #make n random moves to create a solvable puzzle
     def scramble_state(self, n):
         #reset state
         self.set_state(1,2,3,4,5,6,7,8,0)
         
-        #flags to keep track of legal moves
-        row = 2
-        col = 2
-
         #0 = up, 1 = down, 2 = left, 3 = right
         moves = [0,1,2,3]
+        
         #start unable to move up or left since 0 is bottom right
         moves.remove(0)
         moves.remove(2)
 
-        #after each move, must add new possible moves and remove new impossible ones
+        #after each move, must determine new possible moves
         for i in range(n):
             
-            randnum = random.randint(0,len(moves)-1)
+            possible_moves = []
+            blank = self.blank()
+            if blank is None:
+                return None
+            row, col = blank
+            # Identify possible moves based on the blank's position
+            if row > 0:
+                possible_moves.append('down')
+            if row < 2:
+                possible_moves.append('up')
+            if col > 0:
+                possible_moves.append('right')
+            if col < 2:
+                possible_moves.append('left')
 
-            if moves[randnum]==0:
-                
-                self.move('up')
-                col -=1
-                if 1 not in moves:
-                    moves.insert(1,1)
-                if col == 0:
-                    moves.remove(0)
-
-            elif moves[randnum]==1:
-                
-                self.move('down')
-                col+=1
-                if 0 not in moves:
-                    moves.insert(0,0)
-                if col == 2:
-                    moves.remove(1)
-
-            elif moves[randnum]==2:
-                
-                self.move('left')
-                row-=1
-                if 3 not in moves:
-                    moves.insert(3,3)
-                if row == 0:
-                    moves.remove(2)
-
-            elif moves[randnum]==3:
-                
-                self.move('right')
-                row+=1
-                if 2 not in moves:
-                    moves.insert(2,2)
-                if row == 2:
-                    moves.remove(3)
-        self.print_state()
+            # Perform a random move
+            move = random.choice(possible_moves)
+            self.move(move)
+    
         return 'Scrambled successfully'
 
 
 
 
-    #parses text into running commands. Here is where i implement comment checking    
+    #parses text into running commands. Here is where I implement comment checking    
     def cmd(self, txt):
-        txtlwr = txt.lower()
-        words = txtlwr.split(' ')
-        if '#' in words or '//' in words:
-            return 0 
+        if '#' in txt or '//' in txt:
+            return 0
+        
+        words = txt.lower()
+        words = words.replace('\n', '')
+        words = words.split(' ')
+         
        
-        elif 'setstate' in words:
+        if 'setstate' == words[0].lower():
             try:
                 self.set_state(*words[1:])
             except ValueError:
                 print('Error: invalid state')
        
-        elif 'printstate' in words:
+        elif 'printstate' == words[0].lower():
             self.print_state()
+            
 
-        elif 'move' in words:
+        elif 'move' == words[0].lower():
             try:
                 self.move(words[1])
                 
@@ -187,34 +181,44 @@ class EightPuzzle:
             except IndexError:
                 print('Error: Trying to make move before grid has been initialized')
 
-        elif 'scramblestate' in words:
+        elif 'scramblestate' == words[0]:
+            
             self.scramble_state(int(words[1]))
+            
         else:
-            return ValueError
+            print('Invalid Command: ')
+            print(words)
+            return TypeError
         
         
     #Helper: finds indices of blank (0) as a list
     def blank(self):   
-        for i in range(0,2):
-            for j in range(0,2):
+        for i in range(3):
+            for j in range(3):
                 if self.grid[i][j] == 0:
                     return [i,j]   
+        print('Error: blank not found')
+        return IndexError
 
 
     #Helper: validates that a new grid fits our specifications
     def validate_grid(self, new_grid):
         if type(new_grid) is not type(list):
+            print('new grid is not a list')
             return TypeError
         if len(new_grid) != 3:
+            print('new grid is not the correct length')
             return TypeError
         for row in new_grid:
             if len(row) != 3:
+                print('new grid is not the correct length')
                 return TypeError
         missing_arg = True
         for ints in range(0,9):
             if ints not in new_grid:
                 missing_arg = True
         if(len(new_grid) !=9 and not missing_arg):
+            print('Bad size or missing arg')
             return TypeError
 
 
@@ -229,16 +233,32 @@ def cmdfile(file, puzzle):
             try:
                 puzzle.cmd(command)
             except ValueError:
-                print('Error on line: ' + str(num_line))
+                print('ValueError on line: ' + str(num_line))
             except TypeError:
-                print('Error on line: ' + str(num_line))
+                print('TypeError on line: ' + str(num_line))
+            
+        
    
 #runs commands from text input file
-def main(args):
-    return cmdfile(args, EightPuzzle())
+def main(args, puzzle):
+    cmdfile(args, puzzle)
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    #kudos to you if you know this number
+    random.seed(8675309)
+    puzzle = EightPuzzle()
+    if(len(sys.argv)<=1):
+        running = True
+        while(running):
+            choice = input('Enter a command, q to quit:\n')
+            if str(choice) == 'q':
+                running = False
+                break
+            
+            puzzle.cmd(choice)
+            
+    else: 
+        main(sys.argv[1], puzzle)
     
 
 

@@ -1,4 +1,0 @@
-
-move left
-move right
-printState
