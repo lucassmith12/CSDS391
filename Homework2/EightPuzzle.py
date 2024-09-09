@@ -25,53 +25,47 @@ class EightPuzzle:
 
 
     #Helper: validates that a new grid fits our specifications
-    def validate_grid(self, args):
+    def validate_args(self, args):
         
         #Check type
         if type(args) != type(list()):
             return f'Arguments given are a {type(args)} and not a list'
         
         #Check size
-        if len(args) != 3 or any(len(col) != 3 for col in args):
-            return 'new grid is not the correct length'
+        if len(args) != 9:
+            return 'New grid is not the correct length'
         
         #Check for 0-9
         for num in range(0,9):
-            if num not in args:
+            if str(num) not in args:
                 return f'Missing number: {num}'
+            
+        return 'Valid'
         
             
 
 
 
     #sets state of the grid. Expects nine entries, otherwise throws error
-    def set_state(self, *args):
+    def set_state(self, args):
         self.grid = list()
-        #slice the args into three rows
-        
+
+        validity = self.validate_args(args)
+        if validity != 'Valid':
+            return 'Error' + validity
+
         top_row = list(args[:3])
         middle_row = list(args[3:6])
         bottom_row = list(args[6:])
-        
 
-        #add each row to construct the matrix
         self.grid.append(top_row)
         self.grid.append(middle_row)
         self.grid.append(bottom_row)
-
-        #check validity of grid currently broken, will fix later
-        
-        try:
-            self.validate_grid(self.grid)
-        except TypeError:
-            print('Invalid Grid')
-            return TypeError
         
             
-        return self.grid
+        return 'Success'
 
     #print the state of the grid
-    
     def print_state(self):
         string = ''
         for row in self.grid:
@@ -191,10 +185,11 @@ class EightPuzzle:
          
        
         if 'setstate' == words[0].lower():
-            try:
-                self.set_state(*words[1:])
-            except ValueError:
-                print('Error: invalid state')
+            status = self.set_state(words[1:])
+            return status == 'Success'
+                
+            
+            
        
         elif 'printstate' == words[0].lower():
             self.print_state()
