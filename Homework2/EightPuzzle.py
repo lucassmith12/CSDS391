@@ -20,8 +20,7 @@ class EightPuzzle:
             for j in range(3):
                 if self.grid[i][j] == 0:
                     return [i,j]   
-        print('Error: blank not found')
-        return IndexError
+        return 'Error: blank not found'
 
 
     #Helper: validates that a new grid fits our specifications
@@ -37,7 +36,7 @@ class EightPuzzle:
         
         #Check for 0-9
         for num in range(0,9):
-            if str(num) not in args:
+            if num not in args:
                 return f'Missing number: {num}'
             
         return 'Valid'
@@ -47,12 +46,16 @@ class EightPuzzle:
 
 
     #sets state of the grid. Expects nine entries, otherwise throws error
-    def set_state(self, args):
+    def set_state(self, str_args):
         self.grid = list()
 
+        #input args are strings, make them ints
+        args = [int(arg) for arg in str_args]
+       
+        #validate
         validity = self.validate_args(args)
         if validity != 'Valid':
-            return 'Error' + validity
+            return 'Error: ' + validity
 
         top_row = list(args[:3])
         middle_row = list(args[3:6])
