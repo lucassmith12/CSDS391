@@ -55,7 +55,8 @@ class EightPuzzle:
         #validate
         validity = self.validate_args(args)
         if validity != 'Valid':
-            return 'Error: ' + validity
+            print('Error: ' + validity)
+            return 'Error'
 
         top_row = list(args[:3])
         middle_row = list(args[3:6])
@@ -77,19 +78,20 @@ class EightPuzzle:
                 string += ' '
             string += '\n'
         print(string)
-        
+        return 'Success'
 
     #Moves tile into blank space depending on direction
     #Equivalent to moving blank space in opposite direction
     def move(self, direction):
         #check if grid exists
-        
+        err = 'MoveErr'
+
         if len(self.grid) !=3:
             print('Grid is not populated')
-            return IndexError
+            return 'GridErr'
         
 
-        err = TypeError
+        
         move = direction.lower()
         
         #get coords of blank tile
@@ -117,7 +119,7 @@ class EightPuzzle:
             
             if col == 0:
                 print('Illegal move right')
-                return err
+                return 'MoveErr'
             self.grid[row][col] = self.grid[row][col-1]
             self.grid[row][col-1] = 0
             
@@ -126,7 +128,7 @@ class EightPuzzle:
             #but blank is on the right
             if col == 2:
                 print('Illegal move left')
-                return err
+                return 'MoveErr'
             self.grid[row][col] = self.grid[row][col+1]
             self.grid[row][col+1] = 0
             
@@ -134,16 +136,16 @@ class EightPuzzle:
         else: 
             print((move))
             print('Error: Direction not recognized')
-            return ValueError
+            return 'DirErr'
 
         return self.grid
     
     #make n random moves to create a solvable puzzle
     def scramble_state(self, n):
         #reset state
-        self.set_state(1,2,3,4,5,6,7,8,0)
+        self.set_state([0,1,2,3,4,5,6,7,8])
         
-        #0 = up, 1 = down, 2 = left, 3 = right
+        #Define 0 = up, 1 = down, 2 = left, 3 = right
         moves = [0,1,2,3]
         
         #start unable to move up or left since 0 is bottom right
@@ -151,14 +153,14 @@ class EightPuzzle:
         moves.remove(2)
 
         #after each move, must determine new possible moves
-        for i in range(n):
+        for _ in range(n):
             
             possible_moves = []
             blank = self.blank()
             if blank is None:
                 return None
             row, col = blank
-            # Identify possible moves based on the blank's position
+            #identify possible moves based on the blank's position
             if row > 0:
                 possible_moves.append('down')
             if row < 2:
@@ -168,7 +170,7 @@ class EightPuzzle:
             if col < 2:
                 possible_moves.append('left')
 
-            # Perform a random move
+            #perform a random move
             move = random.choice(possible_moves)
             self.move(move)
     
@@ -177,44 +179,52 @@ class EightPuzzle:
 
 
 
-    #parses text into running commands. Here is where I implement comment checking    
+    #parses text into running commands.     
     def cmd(self, txt):
-        if '#' in txt or '//' in txt:
-            return 0
+        
         
         words = txt.lower()
         words = words.replace('\n', '')
         words = words.split(' ')
-         
+        
+        command = words[0].lower()
        
-        if 'setstate' == words[0].lower():
+        if 'setstate' == command:
             status = self.set_state(words[1:])
-            return status == 'Success'
-                
-            
             
        
-        elif 'printstate' == words[0].lower():
-            self.print_state()
-            
-
-        elif 'move' == words[0].lower():
-            try:
-                self.move(words[1])
+        elif 'printstate' == command:
+            status = self.print_state()
+                        
+        elif 'move' == command:
+            status = self.move(words[1])
                 
-            except TypeError:
+            if status == 'MoveErr':
                 print('Error: Invalid Move')
-            except IndexError:
+                return 'Error'
+            elif status ==  'GridErr':
                 print('Error: Trying to make move before grid has been initialized')
+                return 'Error'
+            elif status == 'DirErr':
+                print('Error: Illegal move direction')
+                return 'Error'
 
-        elif 'scramblestate' == words[0]:
+
+        elif 'scramblestate' == command:
+            if len(words) != 2:
+                print('Error: incorrect number of arguments passed')
+                status = 'Error'
+            else:
+                status = self.scramble_state(int(words[1]))
             
-            self.scramble_state(int(words[1]))
             
         else:
-            print('Invalid Command: ')
-            print(words)
-            return TypeError
+            print(f'Invalid Command: {command}')
+            return 'Error'
+        
+        
+        print(command, ': ', status)
+        return status
         
         
     
@@ -225,13 +235,18 @@ def cmdfile(file, puzzle):
         cmds = text.readlines()
         num_line = 0
         for command in cmds:
-            num_line += 1
-            try:
-                puzzle.cmd(command)
-            except ValueError:
-                print('ValueError on line: ' + str(num_line))
-            except TypeError:
-                print('TypeError on line: ' + str(num_line))
+            if '#' in command or '//' in command:
+                print(command)
+            else:    
+                print('Running ', command)
+                num_line += 1
+                status = puzzle.cmd(command)
+                if status == 'Error':
+                    print('Error on line: ', num_line)
+                # else continue
+                
+                
+            
             
         
    

@@ -1,0 +1,12 @@
+scrambleState 100
+printState
+move up
+printState
+move left
+printState
+move down
+printState
+// yooooooooooo you gotta move down right now please
+#move right now darnit
+move right
+printState
