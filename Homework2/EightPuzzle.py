@@ -2,10 +2,11 @@
 Lucas Smith
 CSDS391: Intro to AI
 Case ID: ljs174
-Homework 1 Submission
+Homework 2 Submission
 '''
 import random
 import sys
+from SearchFunctions import dfs, bfs
 
 class EightPuzzle: 
     #define our grid as a 3D matrix, with entries representing numbers in the grid
@@ -13,6 +14,12 @@ class EightPuzzle:
     
     def __init__(self):
         self.grid = list()
+        self.ancestors = list()
+    
+    def copy(self, other):
+        self.grid = other.grid
+        self.ancestors = other.ancestors
+        return self.grid
         
     #Helper: finds indices of blank (0) as a list
     def blank(self):   
@@ -41,8 +48,25 @@ class EightPuzzle:
             
         return 'Valid'
         
-            
-
+    #returns legal moves from current state    
+    def find_moves(self):
+        possible_moves = []
+        blank = self.blank()
+        if blank is None:
+            return None
+        row, col = blank
+        #identify possible moves based on the blank's position
+        #priority is left--> right --> up --> down
+        if col < 2:
+            possible_moves.append('left')
+        if col > 0:
+            possible_moves.append('right')
+        if row < 2:
+            possible_moves.append('up')
+        if row > 0:
+            possible_moves.append('down')
+        
+        return possible_moves
 
 
     #sets state of the grid. Expects nine entries, otherwise throws error
@@ -79,6 +103,7 @@ class EightPuzzle:
             string += '\n'
         print(string)
         return 'Success'
+
 
     #Moves tile into blank space depending on direction
     #Equivalent to moving blank space in opposite direction
@@ -145,38 +170,18 @@ class EightPuzzle:
         #reset state
         self.set_state([0,1,2,3,4,5,6,7,8])
         
-        #Define 0 = up, 1 = down, 2 = left, 3 = right
-        moves = [0,1,2,3]
-        
-        #start unable to move up or left since 0 is bottom right
-        moves.remove(0)
-        moves.remove(2)
 
         #after each move, must determine new possible moves
         for _ in range(n):
             
-            possible_moves = []
-            blank = self.blank()
-            if blank is None:
-                return None
-            row, col = blank
-            #identify possible moves based on the blank's position
-            if row > 0:
-                possible_moves.append('down')
-            if row < 2:
-                possible_moves.append('up')
-            if col > 0:
-                possible_moves.append('right')
-            if col < 2:
-                possible_moves.append('left')
+            possible_moves = self.find_moves()
 
             #perform a random move
             move = random.choice(possible_moves)
             self.move(move)
     
-        return 'Scrambled successfully'
-
-
+        return 'Success'
+    
 
 
     #parses text into running commands.     
@@ -209,7 +214,6 @@ class EightPuzzle:
                 print('Error: Illegal move direction')
                 return 'Error'
 
-
         elif 'scramblestate' == command:
             if len(words) != 2:
                 print('Error: incorrect number of arguments passed')
@@ -217,17 +221,23 @@ class EightPuzzle:
             else:
                 status = self.scramble_state(int(words[1]))
             
-            
+        elif 'solve' == command:
+            algo = words[1]
+            max = words[2]
+            if algo == 'dfs':
+                return dfs(self, max_nodes=max)  
+            elif algo == 'bfs':
+                return bfs(self, max_nodes=max)
+            else:
+                print('Error: unknown search command')
+                return 'Error'
         else:
             print(f'Invalid Command: {command}')
             return 'Error'
         
-        
         print(command, ': ', status)
         return status
         
-        
-    
         
 #parses commands and runs each one
 def cmdfile(file, puzzle):
@@ -247,15 +257,12 @@ def cmdfile(file, puzzle):
                 
                 
             
-            
-        
-   
 #runs commands from text input file
 def main(args, puzzle):
     cmdfile(args, puzzle)
 
 if __name__ == '__main__':
-    #kudos to you if you know this number
+    #best number choice, iykyk
     random.seed(8675309)
     puzzle = EightPuzzle()
     if(len(sys.argv)<=1):
@@ -265,7 +272,6 @@ if __name__ == '__main__':
             if str(choice) == 'q':
                 running = False
                 break
-            
             puzzle.cmd(choice)
             
     else: 
