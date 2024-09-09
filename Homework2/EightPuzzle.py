@@ -14,6 +14,34 @@ class EightPuzzle:
     def __init__(self):
         self.grid = list()
         
+    #Helper: finds indices of blank (0) as a list
+    def blank(self):   
+        for i in range(3):
+            for j in range(3):
+                if self.grid[i][j] == 0:
+                    return [i,j]   
+        print('Error: blank not found')
+        return IndexError
+
+
+    #Helper: validates that a new grid fits our specifications
+    def validate_grid(self, args):
+        
+        #Check type
+        if type(args) != type(list()):
+            return f'Arguments given are a {type(args)} and not a list'
+        
+        #Check size
+        if len(args) != 3 or any(len(col) != 3 for col in args):
+            return 'new grid is not the correct length'
+        
+        #Check for 0-9
+        for num in range(0,9):
+            if num not in args:
+                return f'Missing number: {num}'
+        
+            
+
 
 
     #sets state of the grid. Expects nine entries, otherwise throws error
@@ -191,37 +219,7 @@ class EightPuzzle:
             return TypeError
         
         
-    #Helper: finds indices of blank (0) as a list
-    def blank(self):   
-        for i in range(3):
-            for j in range(3):
-                if self.grid[i][j] == 0:
-                    return [i,j]   
-        print('Error: blank not found')
-        return IndexError
-
-
-    #Helper: validates that a new grid fits our specifications
-    def validate_grid(self, new_grid):
-        if type(new_grid) is not type(list):
-            print('new grid is not a list')
-            return TypeError
-        if len(new_grid) != 3:
-            print('new grid is not the correct length')
-            return TypeError
-        for row in new_grid:
-            if len(row) != 3:
-                print('new grid is not the correct length')
-                return TypeError
-        missing_arg = True
-        for ints in range(0,9):
-            if ints not in new_grid:
-                missing_arg = True
-        if(len(new_grid) !=9 and not missing_arg):
-            print('Bad size or missing arg')
-            return TypeError
-
-
+    
         
 #parses commands and runs each one
 def cmdfile(file, puzzle):

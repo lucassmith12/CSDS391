@@ -32,13 +32,13 @@ class EightPuzzle:
         self.grid.append(bottom_row)
 
         #check validity of grid currently broken, will fix later
-        
+        '''
         try:
             self.validate_grid(self.grid)
         except TypeError:
             print('Invalid Grid')
             return TypeError
-        
+        '''
             
         return self.grid
 
