@@ -6,7 +6,8 @@ Homework 2 Submission
 '''
 import random
 import sys
-
+import copy
+from collections import deque 
 
 class EightPuzzle: 
     #define our grid as a 3D matrix, with entries representing numbers in the grid
@@ -191,6 +192,9 @@ class EightPuzzle:
         words = txt.lower()
         words = words.replace('\n', '')
         words = words.split(' ')
+        for word in words:
+            if word == '' or word == '\n' or word == '\t':
+                words.remove(word)
         
         command = words[0].lower()
        
@@ -223,11 +227,14 @@ class EightPuzzle:
             
         elif 'solve' == command:
             algo = words[1]
-            max = words[2]
+            max = 1000
+            if len(words) > 2:
+                max = int(words[2].split('=')[1])
+           
             if algo == 'dfs':
-                return dfs(self, max_nodes=max)  
+                status =  dfs(self, max_nodes=max) 
             elif algo == 'bfs':
-                return bfs(self, max_nodes=max)
+                status =  bfs(self, max_nodes=max)
             else:
                 print('Error: unknown search command')
                 return 'Error'
@@ -239,62 +246,47 @@ class EightPuzzle:
         return status
         
 #Homework 2 submissions
-# 
-# 
-# 
+
 goal = [[0,1,2],[3,4,5],[6,7,8]]
 def bfs(original_puzzle, max_nodes=1000):
     nodes = 1
     if original_puzzle.grid == goal:
         return print_results(original_puzzle.ancestors, nodes)
    
-    puzzle = EightPuzzle()
-    puzzle.copy(original_puzzle)
-    queue = list()
+    puzzle = copy.deepcopy(original_puzzle)
+    queue = deque()
 
     queue.append(puzzle)
     while len(queue) != 0:
-        node = queue.pop()
+        node = queue.popleft()
         for move in node.find_moves():
             nodes +=1
-            queue.append(move)
-            child = EightPuzzle()
-            child.copy(node)
-            child.ancestors.append(move)
+            
+            child = copy.deepcopy(node)
+            child.ancestors.append(' '.join(['move', move]))
+            child.move(move)
             if child.grid == goal:
-                return child.ancestors
+                return print_results(child.ancestors, nodes)
             elif nodes >= max_nodes:
                 return 'Error'
+            else:
+                queue.append(copy.deepcopy(child))
             
             
 #Runs recursive dfs on a puzzle
 def dfs(original_puzzle, max_nodes=1000):
-    puzzle = EightPuzzle()
-    puzzle.copy(original_puzzle) 
-    status = dfs_helper(puzzle, max_nodes, 1)
+    puzzle = copy.deepcopy(original_puzzle) 
+    results = dfs_helper(puzzle, max_nodes, 1)
     
-    if status == 'Error':
+    if results == 'Error':
         print(f'Error: maxnodes limit ({max_nodes}) reached')
         return 'Error'
-    elif status > 0 :
+    elif type(results) is type(list()):
         print('Solution Found')
-        return 'Success'
+        return print_results(results[0],results[1])
     else: 
         print('Error occurred')
 
-
-
-def dfs(original_puzzle, max_nodes=1000):
-    node = EightPuzzle()
-    node.copy(original_puzzle) 
-    if max_nodes== 0:
-        print('Error: maxnodes limit reached, search terminated')
-    if node.grid == goal:
-        print('Solution Found')
-        return print_results(list(), 1)
-    else:
-        results = dfs_helper(original_puzzle, max_nodes, 1)
-        return print_results(results[0],results[1])
 
 
 #recursive caller for dfs
@@ -304,8 +296,8 @@ def dfs_helper(puzzle, max, nodes):
     elif puzzle.grid == goal:
         return ['Found']
     
-    queue = puzzle.find_moves()
-    for move in queue:
+    stack = puzzle.find_moves()
+    for move in stack:
         nodes +=1
         child = EightPuzzle()
         child.copy(puzzle)
@@ -316,7 +308,7 @@ def dfs_helper(puzzle, max, nodes):
         elif subtree[0] == 'Found':
             return (subtree.append(move), nodes)
         
-        queue.append(child.find_moves())
+        
     
 def print_results(ancestors, nodes):
     print(f'Nodes created during search: {nodes}')
@@ -324,6 +316,7 @@ def print_results(ancestors, nodes):
     print('Solution:')
     for ancestor in ancestors:
         print(ancestor)
+    return 'Success'
         
 #parses commands and runs each one
 def cmdfile(file, puzzle):

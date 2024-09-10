@@ -1,12 +1,12 @@
-scrambleState 100
-printState
+setState 0 1 2 3 4 5 6 7 8
+# goal setting
 move up
-printState
 move left
-printState
-move down
-printState
-// yooooooooooo you gotta move down right now please
-#move right now darnit
+move left
+move up
 move right
+move down
+// Expected state: [[3, 1, 2], [4, 0, 8], [6, 5, 7]]
 printState
+solve bfs 
+solve bfs max_nodes=1000
