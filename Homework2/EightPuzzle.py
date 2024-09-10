@@ -175,6 +175,7 @@ class EightPuzzle:
         #after each move, must determine new possible moves
         for _ in range(n):
             
+            # list of valid moves
             possible_moves = self.find_moves()
 
             #perform a random move
@@ -309,7 +310,7 @@ def dfs_helper(puzzle, max, nodes):
             return (subtree.append(move), nodes)
         
         
-    
+#Format search results    
 def print_results(ancestors, nodes):
     print(f'Nodes created during search: {nodes}')
     print(f'Solution length: {len(ancestors)}')

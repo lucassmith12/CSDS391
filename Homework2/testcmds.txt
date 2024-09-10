@@ -10,3 +10,6 @@ move down
 printState
 solve bfs 
 solve bfs max_nodes=1000
+solve dfs max_nodes=100
+//the second dfs will break max recursion depth
+//solve dfs
