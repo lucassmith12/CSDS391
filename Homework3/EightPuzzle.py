@@ -36,7 +36,7 @@ if __name__ == '__main__':
     #best number choice, iykyk
     random.seed(8675309)
    
-    
+    puzzle = EightPuzzle()
     if(len(sys.argv)<=1):
         running = True
         while(running):
@@ -44,10 +44,10 @@ if __name__ == '__main__':
             if str(choice) == 'q':
                 running = False
                 break
-            cmd(EightPuzzle(), choice)
+            cmd(puzzle, choice)
             
     else: 
-        main(sys.argv[1], EightPuzzle())
+        main(sys.argv[1], puzzle)
     
 
 

@@ -62,10 +62,7 @@ class EightPuzzle:
         err = 'MoveErr'
 
         if len(self.grid) !=3:
-            print('Grid is not populated')
             return 'GridErr'
-        
-
         
         move = direction.lower()
         
