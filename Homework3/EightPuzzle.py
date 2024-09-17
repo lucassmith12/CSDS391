@@ -14,17 +14,18 @@ from commands import cmd
 def cmdfile(file, puzzle):
     with open(file) as text:
         cmds = text.readlines()
-        num_line = 0
+        num_line = 1
         for command in cmds:
             if '#' in command or '//' in command:
                 print(command)
             else:    
                 print('Running ', command)
-                num_line += 1
                 status = cmd(puzzle, command)
                 if status == 'Error':
                     print('Error on line: ', num_line)
                 # else continue
+            num_line += 1
+
                 
                 
 #runs commands from text input file

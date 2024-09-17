@@ -20,7 +20,8 @@ def a_star(original_puzzle, heur, max_nodes=1000):
     else:
         return 'Error: invalid heuristic'
     #Heap is ordered by heuristic, then move order, then in order they were added to the queue
-    heappush(priority_q, (heuristic(original_puzzle.grid), -1, nodes, original_puzzle))
+    heappush(priority_q, (heuristic(original_puzzle.grid)+ len(original_puzzle.ancestors), 
+                          -1, nodes, original_puzzle))
     while len(priority_q) != 0 and nodes <= max_nodes:
         node = heappop(priority_q)[3]
         
@@ -28,7 +29,7 @@ def a_star(original_puzzle, heur, max_nodes=1000):
             return print_results(node.ancestors, nodes)
 
         
-        #lists are unhashable, have to use a tuple instead
+        #lists are unhashable, have to use a string of numbers instead
         visited.add(linear(node.grid))
 
         for move in node.find_moves():
@@ -37,8 +38,9 @@ def a_star(original_puzzle, heur, max_nodes=1000):
             child.ancestors.append(' '.join(['move', move]))
             
             if linear(child.grid) not in visited:
-                heappush(priority_q, (heuristic(child.grid), move_to_num(move), nodes, child))
+                heappush(priority_q, (heuristic(child.grid) + len(child.ancestors), move_to_num(move), nodes, child))
                 nodes +=1
+    return 'Error: max nodes reached'
 
 #Helper to convert grid into a string literal of numbers to hash into a set
 def linear(grid) -> str:
@@ -113,6 +115,7 @@ def bfs(original_puzzle, max_nodes=1000):
             if child.grid == goal:
                 return print_results(child.ancestors, nodes)
             elif nodes >= max_nodes:
+                print('Error: max nodes reached')
                 return 'Error'
             else:
                 queue.append(deepcopy(child))
@@ -161,4 +164,4 @@ def print_results(ancestors, nodes):
     print('Solution:')
     for ancestor in ancestors:
         print(ancestor)
-    return 'Success'
+    return 'Success\n'
