@@ -1,0 +1,14 @@
+setState 0 1 2 3 4 5 6 7 8
+printState
+// show a* search trivially works for both heuristics on the goal state
+solve a* h1
+solve a* h2
+setState 1 0 4 3 5 8 6 2 7
+printState
+// show a* search works on scrambled state, for both heuristics and for given nodes
+solve a* h1
+solve a* h2
+solve a* h1 maxnodes=200
+solve a* h2 maxnodes=200
+// for comparison, lets run bfs
+solve bfs maxnodes=1000000
