@@ -39,7 +39,7 @@ def cmd(puzzle, txt):
                 print('Error in solve method')
                 return 'Error'
             
-        status = search(puzzle, algo, nodes, heuristic)
+        return search(puzzle, algo, nodes, heuristic)[0]
         
     else:
         print(f'Invalid Command: {command}')

@@ -26,7 +26,7 @@ def a_star(original_puzzle, heur, max_nodes=1000):
         node = heappop(priority_q)[3]
         
         if node.grid == goal:
-            return print_results(node.ancestors, nodes)
+            return (node.ancestors, nodes)
 
         
         #lists are unhashable, have to use a string of numbers instead
@@ -95,7 +95,7 @@ def heuristic2(grid) -> int:
 def bfs(original_puzzle, max_nodes=1000):
     nodes = 1
     if original_puzzle.grid == goal:
-        return print_results(original_puzzle.ancestors, nodes)
+        return (original_puzzle.ancestors, nodes)
    
     puzzle = deepcopy(original_puzzle)
     queue = deque()
@@ -104,7 +104,7 @@ def bfs(original_puzzle, max_nodes=1000):
     while len(queue) != 0:
         if nodes > max_nodes:
             print('Error: max nodes reached')
-            return 'Error'
+            return 'Error', max_nodes
         node = queue.popleft()
         for move in node.find_moves():
             nodes +=1
@@ -113,49 +113,57 @@ def bfs(original_puzzle, max_nodes=1000):
             child.ancestors.append(' '.join(['move', move]))
             child.move(move)
             if child.grid == goal:
-                return print_results(child.ancestors, nodes)
+                return (child.ancestors, nodes)
             elif nodes >= max_nodes:
                 print('Error: max nodes reached')
-                return 'Error'
+                return 'Error', max_nodes
             else:
                 queue.append(deepcopy(child))
 
 
-#Runs recursive dfs on a puzzle
 def dfs(original_puzzle, max_nodes=1000):
-    puzzle = deepcopy(original_puzzle) 
-    results = dfs_helper(puzzle, max_nodes, 1)
-    
-    if results == 'Error':
-        print(f'Error: maxnodes limit ({max_nodes}) reached')
-        return 'Error'
-    elif type(results) is type(list()):
-        print('Solution Found')
-        return print_results(results[0],results[1])
-    else: 
-        print('Error occurred')
+    puzzle = deepcopy(original_puzzle)  
+    #build our stack as a list of states defined by the puzzle and the moves to get there
+    stack = [(puzzle, [])]  
+    visited = set()            
+    nodes = 1                  
+    while len(stack) != 0:
+        current_puzzle, path = stack.pop()
 
+        if nodes > max_nodes:
+            print(f'Error: max nodes limit ({max_nodes}) reached')
+            return 'Error', max_nodes
 
+        if current_puzzle.grid == goal:
+            return path, nodes
 
-#recursive caller for dfs
-def dfs_helper(puzzle, max, nodes):
-    if nodes > max:
-        return 'Error'
-    elif puzzle.grid == goal:
-        return ['Found']
-    
-    stack = puzzle.find_moves()
-    for move in stack:
-        nodes +=1
-        child = EightPuzzle()
-        child.copy(puzzle)
-        child.move(move)
-        subtree = dfs_helper(child, max, nodes)
-        if subtree == 'Error':
-            return 'Error'
-        elif subtree[0] == 'Found':
-            return (subtree.append(move), nodes)
+        visited.add(linear(current_puzzle.grid))
+
+        for move in current_puzzle.find_moves():
+            child_puzzle = deepcopy(current_puzzle)
+            child_puzzle.move(move)
+
+            if linear(child_puzzle.grid) not in visited:
+                nodes += 1
+                stack.append((child_puzzle, path + ['move ' + move] ))
+
+    print('Error: algorithm found no solution')
+    return 'Error', nodes
         
+def find_branching_factor(depth, nodes):
+    # Find N + 1 = b*^0 + b* + b*^2 + b*^3 ... + b*^d
+    N=1
+    b=0
+    while(int(N)<nodes):
+        b+=0.01
+        N=1
+        #don't raise to the 0th power, add one to make range inclusive of root
+        for exp in range(1, len(depth)+1): 
+            N+=b**exp
+    return b
+
+
+
         
 #Format search results    
 def print_results(ancestors, nodes):
@@ -164,4 +172,5 @@ def print_results(ancestors, nodes):
     print('Solution:')
     for ancestor in ancestors:
         print(ancestor)
+    print(f'Branching factor b* = {find_branching_factor(len(ancestors), nodes)}')
     return 'Success\n'
