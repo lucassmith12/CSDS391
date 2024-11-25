@@ -14,7 +14,11 @@ dimensions = ["sepal_length","sepal_width","petal_length","petal_width"]
 
 def raw_iris_data() -> List:
     with open('./Homework9/irisdata.csv') as csvfile:
-        return list(csv.reader(csvfile, delimiter=","))[1:]
+        # remove the headers
+        data = list(csv.reader(csvfile, delimiter=","))[1:]
+        # remove setosas (first group)
+        data = [row for row in data if row[4] != 'setosa']
+        return data
 
 # includes species as final col    
 def iris_lengths_widths() -> List:
@@ -32,11 +36,9 @@ def iris_data_floats() -> List:
     
 def plot_iris_data() -> None:
     data = iris_lengths_widths()
-    setosas = [row for row in data if row[2] == 'setosa']
     virginicas = [row for row in data if row[2] == 'virginica']
     versicolors = [row for row in data if row[2] == 'versicolor']
     
-    plt.scatter([float(setosa[0]) for setosa in setosas], [float(setosa[1]) for setosa in setosas], color='red', marker='o', label='setosas')
     plt.scatter([float(virginica[0]) for virginica in virginicas], [float(virginica[1]) for virginica in virginicas], color='green', marker='*', label='virginicas')
     plt.scatter([float(versicolor[0]) for versicolor in versicolors], [float(versicolor[1]) for versicolor in versicolors], color='blue', marker='x', label='versicolors')
 
@@ -44,10 +46,27 @@ def plot_iris_data() -> None:
 
     plt.xlabel('Petal length (cm)')
     plt.ylabel('Petal width (cm)')
-    plt.title('Iris Dataset')
+    plt.title('Virginica and Versicolor Sizes')
 
-    plt.show()
          
 
-#def neural_network() -> float:
-     
+def neural_network(neurons: List[int], weights: List[int], bias: float) -> float:
+    x = bias
+    for neuron, weight in neurons, weights:
+        x += neuron*weight
+    return 1/(1+np.exp(x*(-1)))
+
+def plot_decision_boundary(weights: List[int], bias: float):
+    plot_iris_data()
+
+    x1_range = np.linspace(2, 7)  # Range for petal length
+    x2_boundary = -(bias / weights[1]) - (weights[0] / weights[1]) * x1_range  # Compute boundary
+
+    plt.plot(x1_range, x2_boundary, color='black', linestyle='--', label='Decision Boundary')
+    plt.show()
+
+
+
+weights = [.5,1]
+bias = -4
+plot_decision_boundary(weights, bias)
