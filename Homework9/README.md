@@ -1,0 +1,1 @@
+Please note that for the plot_iris_data function, to run it by itself you must uncomment the plt.show() command at the bottom of the method. It is annoying and I apologive for that, but i needed a quick way to use it in other methods without creating an extra graph as a byproduct. Thanks!
