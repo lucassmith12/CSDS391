@@ -97,7 +97,7 @@ def kmeans_cluster_plot(means: list, data: list, dimensions, max_iters: int):
 
         for i in range(len(maxes) - 1):
             for j in range(i + 1, len(mins)):
-                if len(groups) == 2 or i == 2 or j == 2 or (i == 1 and j==0 or i== 0 and j ==2):
+                if len(group) == 2 or i == 2 or j == 2 or (i == 1 and j==0 or i== 0 and j ==2):
                     print(maxes[i], mins[j], (maxes[i] + mins[j]) / 2)
                     overlaps.append((i, j, (maxes[i] + mins[j]) / 2))
         print(overlaps)
